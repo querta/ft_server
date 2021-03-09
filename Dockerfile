@@ -1,7 +1,7 @@
 # CLEAN: 	docker system prune -a -f
 # BUILD 	docker build -t image .
-# RUN		docker run -p 80:80 -p 443:443 --name ft_server image
-# SHELL		docker exec -it ft_server /bin/bash
+# RUN		docker run -p 80:80 -p 443:443 --name cont_name image
+# SHELL		docker exec -it cont_name /bin/bash
 
 FROM debian:buster
 
@@ -10,20 +10,22 @@ RUN apt update
 RUN apt install -y nginx
 RUN apt install -y php-mysql php-fpm php-cgi
 RUN apt install -y wget vim mariadb-server
-RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-all-languages.tar.gz
-RUN wget https://ru.wordpress.org/latest-ru_RU.tar.gz
-RUN mkdir /var/www/wp
-RUN tar -xvf latest-ru_RU.tar.gz -C /var/www/wp --strip-components 1
-RUN mkdir /var/www/pma
-RUN tar -xvf phpMyAdmin-5.0.4-all-languages.tar.gz -C /var/www/pma --strip-components 1
-RUN rm latest-ru_RU.tar.gz phpMyAdmin-5.0.4-all-languages.tar.gz
+RUN wget -O phpmyadmin.tar.gz https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-all-languages.tar.gz
+RUN wget -O wordpress.tar.gz https://ru.wordpress.org/latest-ru_RU.tar.gz
+RUN tar -xf wordpress.tar.gz
+RUN tar -xf phpmyadmin.tar.gz
+RUN mv phpMyAdmin-5.0.4-all-languages /var/www/pma
+RUN mv wordpress /var/www/wp
+RUN rm wordpress.tar.gz phpmyadmin.tar.gz
 
 RUN mkdir /etc/nginx/ssl
-RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/othercrt.pem -keyout /etc/nginx/ssl/othercrt.key -subj "/C=RU/ST=Moscow/L=Moscow/O=21 school/OU=Mmonte/CN=othercrt"
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/private.pem -keyout /etc/nginx/ssl/public.key -subj "/C=RU/ST=Moscow/L=Moscow/O=21 school/OU=Mmonte/CN=othercrt"
 
-COPY /srcs/nginx.conf /etc/nginx/sites-available/nginx.conf
+# COPY /srcs/nginx.conf /etc/nginx/sites-available/nginx.conf
+COPY /srcs/nginx/etc/nginx/sites-available/nginx
 COPY /srcs/wp-config.php /var/www/wp/
-RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
+# RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
+RUN ln -s /etc/nginx/sites-available/nginx /etc/nginx/sites-enabled/nginx
 RUN ln -s /var/www/wp /var/www/html/wp
 RUN ln -s /var/www/pma /var/www/html/pma
 
@@ -36,7 +38,6 @@ RUN chmod -R 755 /var/www/
 EXPOSE 80 443
 
 COPY /srcs/start.sh ./
-
 CMD bash start.sh
 
 
