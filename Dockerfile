@@ -37,3 +37,5 @@ EXPOSE 80 443
 
 COPY /srcs/start.sh ./
 CMD bash start.sh
+
+
