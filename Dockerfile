@@ -21,11 +21,9 @@ RUN rm wordpress.tar.gz phpmyadmin.tar.gz
 RUN mkdir /etc/nginx/ssl
 RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/private.pem -keyout /etc/nginx/ssl/public.key -subj "/C=RU/ST=Moscow/L=Moscow/O=21 school/OU=Mmonte/CN=othercrt"
 
-# COPY /srcs/nginx.conf /etc/nginx/sites-available/nginx.conf
-COPY /srcs/nginx/etc/nginx/sites-available/nginx
+COPY /srcs/nginx.conf /etc/nginx/sites-available/nginx.conf
 COPY /srcs/wp-config.php /var/www/wp/
-# RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
-RUN ln -s /etc/nginx/sites-available/nginx /etc/nginx/sites-enabled/nginx
+RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
 RUN ln -s /var/www/wp /var/www/html/wp
 RUN ln -s /var/www/pma /var/www/html/pma
 
@@ -39,5 +37,3 @@ EXPOSE 80 443
 
 COPY /srcs/start.sh ./
 CMD bash start.sh
-
-
